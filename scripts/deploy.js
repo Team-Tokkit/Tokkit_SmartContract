@@ -1,3 +1,5 @@
+require("dotenv").config(); // .env 파일에서 SPRING_RESOURCE_PATH 읽기
+
 const hre = require("hardhat");
 const { formatEther } = require("ethers");
 const fs = require("fs");
@@ -17,16 +19,27 @@ async function main() {
   const deployedAddress = await contract.getAddress();
   console.log("✅ Contract deployed at:", deployedAddress);
 
-  // 🔽 배포 주소를 JSON 파일로 저장
-  const savePath = path.join(__dirname, "../contract-address.json");
+  // JSON 생성
   const output = {
     contractAddress: deployedAddress,
     network: hre.network.name,
     updatedAt: new Date().toISOString(),
   };
 
-  fs.writeFileSync(savePath, JSON.stringify(output, null, 2));
-  console.log(`📝 Saved deployed address to ${savePath}`);
+  const outputPath = path.join(__dirname, "..", "contract-address.json");
+  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+  console.log("📝 Saved to contract-address.json");
+
+  // Spring Boot로 복사
+  const springPath = process.env.SPRING_RESOURCE_PATH;
+  if (!springPath) {
+    console.warn("⚠️ SPRING_RESOURCE_PATH not set. Skipping copy.");
+    return;
+  }
+
+  const resolvedPath = path.resolve(__dirname, "..", springPath);
+  fs.copyFileSync(outputPath, resolvedPath);
+  console.log(`📁 Copied to Spring Boot: ${resolvedPath}`);
 }
 
 main().catch((error) => {
