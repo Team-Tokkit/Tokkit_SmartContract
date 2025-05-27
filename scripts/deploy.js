@@ -1,9 +1,10 @@
-require("dotenv").config(); // .env 파일에서 SPRING_RESOURCE_PATH 읽기
+require("dotenv").config(); // .env에서 SPRING_SERVER_URL 읽음
 
 const hre = require("hardhat");
 const { formatEther } = require("ethers");
 const fs = require("fs");
 const path = require("path");
+const axios = require("axios");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
@@ -30,16 +31,21 @@ async function main() {
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
   console.log("📝 Saved to contract-address.json");
 
-  // Spring Boot로 복사
-  const springPath = process.env.SPRING_RESOURCE_PATH;
-  if (!springPath) {
-    console.warn("⚠️ SPRING_RESOURCE_PATH not set. Skipping copy.");
+  // Spring Boot 서버에 POST 전송
+  const springApiUrl = process.env.SPRING_SERVER_URL;
+  if (!springApiUrl) {
+    console.warn("⚠️ SPRING_SERVER_URL not set. Skipping POST.");
     return;
   }
 
-  const resolvedPath = path.resolve(__dirname, "..", springPath);
-  fs.copyFileSync(outputPath, resolvedPath);
-  console.log(`📁 Copied to Spring Boot: ${resolvedPath}`);
+  try {
+    await axios.post(`${springApiUrl}/api/contracts/address`, {
+      TokkitToken: deployedAddress,
+    });
+    console.log("🚀 Sent contract address to Spring server");
+  } catch (err) {
+    console.error("❌ Failed to send contract address to Spring:", err.message);
+  }
 }
 
 main().catch((error) => {
