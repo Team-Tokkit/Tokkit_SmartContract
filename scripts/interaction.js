@@ -10,29 +10,29 @@ async function main() {
   // 컨트랙트 인스턴스 불러오기
   const TokkitToken = await ethers.getContractAt("TokkitToken", deployedAddress);
 
-  // 🔹 Mint - owner만 가능
+  // Mint - owner만 가능
   const mintTx = await TokkitToken.mint(user1.address, ethers.parseEther("10"));
   await mintTx.wait();
-  console.log("✅ Mint 완료");
+  console.log(" Mint 완료");
 
-  // 🔹 Transfer
+  // Transfer
   const transferTx = await TokkitToken.connect(user1).transferToken(owner.address, ethers.parseEther("5"));
   await transferTx.wait();
-  console.log("✅ Transfer 완료");
+  console.log(" Transfer 완료");
 
-  // 🔹 Burn - owner만 가능
+  // Burn - owner만 가능
   const burnTx = await TokkitToken.burn(user1.address, ethers.parseEther("2"));
   await burnTx.wait();
-  console.log("✅ Burn 완료");
+  console.log(" Burn 완료");
 
-  // 🔹 Balance 조회
+  // Balance 조회
   const balance1 = await TokkitToken.balanceOf(user1.address);
   const balance0 = await TokkitToken.balanceOf(owner.address);
-  console.log(`💰 user1 balance: ${ethers.formatEther(balance1)} TKT`);
-  console.log(`💰 owner balance: ${ethers.formatEther(balance0)} TKT`);
+  console.log(` user1 balance: ${ethers.formatEther(balance1)} TKT`);
+  console.log(` owner balance: ${ethers.formatEther(balance0)} TKT`);
 }
 
 main().catch((err) => {
-  console.error("❌ Error:", err);
+  console.error(" Error:", err);
   process.exitCode = 1;
 });
